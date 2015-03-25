@@ -36,13 +36,13 @@ The AngularJS files are all located within `/app/js`, structured in the followin
 
 ```
 /controllers
-  _index.js   (the main module on which to mount all controllers, loaded in main.js)
+  _index.js   (the main module on which all controllers will be mounted, loaded in main.js)
   example.js
 /directives
-  _index.js   (the main module on which to mount all directives, loaded in main.js)
+  _index.js   (the main module on which all directives will be mounted, loaded in main.js)
   example.js
 /services
-  _index.js   (the main module on which to mount all services, loaded in main.js)
+  _index.js   (the main module on which all services will be mounted, loaded in main.js)
   example.js
 constants.js  (any constant values that you want to make available to Angular)
 main.js       (the main file read by Browserify, also where the application is defined and bootstrapped)
@@ -51,13 +51,13 @@ routes.js     (all route definitions and logic)
 templates.js  (this is created via Gulp by compiling your views, and will not be present beforehand)
 ```
 
-Controllers, services, directives, etc. should all be placed within their respective folders and mounted on their respective `_index.js` module. Most other logic can be placed in an existing file, or added in new files as long as it is required inside `main.js`.
+Controllers, services, directives, etc. should all be placed within their respective folders, and will be automatically required via their respective `_index.js` using `bulk-require`. Most other logic can be placed in an existing file, or added in new files as long as it is required inside `main.js`.
 
 ##### Dependency injection
 
 Dependency injection is carried out with the `ng-annotate` library. In order to take advantage of this, a simple comment of the format:
 
-```
+```javascript
 /**
  * @ngInject
  */
@@ -69,7 +69,7 @@ needs to be added directly before any Angular functions/modules. The Gulp tasks 
 
 ### SASS
 
-SASS, standing for 'Syntactically Awesome Style Sheets', is a CSS extension language adding things like extending, variables, and mixins to the language. This boilerplate provides a barebones file structure for your styles, with explicit imports into `app/sass/main.scss`. A Gulp task (discussed later) is provided for compilation and minification of the stylesheets based on this file.
+SASS, standing for 'Syntactically Awesome Style Sheets', is a CSS extension language adding things like extending, variables, and mixins to the language. This boilerplate provides a barebones file structure for your styles, with explicit imports into `app/styles/main.scss`. A Gulp task (discussed later) is provided for compilation and minification of the stylesheets based on this file.
 
 ---
 
@@ -93,6 +93,8 @@ A number of build processes are automatically run on all of our Javascript files
 
 - **JSHint:** Gulp is currently configured to run a JSHint task before processing any Javascript files. This will show any errors in your code in the console, but will not prevent compilation or minification from occurring.
 - **Browserify:** The main build process run on any Javascript files. This processes any of the `require('module')` statements, compiling the files as necessary.
+- **Babelify:** This uses [babelJS](https://babeljs.io/) to provide support for ES6+ features.
+- **Debowerify:** Parses `require()` statements in your code, mapping them to `bower_components` when necessary. This allows you to use and include bower components just as you would npm modules.
 - **ngAnnotate:** This will automatically add the correct dependency injection to any AngularJS files, as mentioned previously.
 - **Uglifyify:** This will minify the file created by Browserify and ngAnnotate.
 
@@ -100,7 +102,9 @@ The resulting file (`main.js`) is placed inside the directory `/build/js/`.
 
 ##### Styles
 
-Just one task is necessary for processing our SASS files, and that is `gulp-sass`. This will read the `main.scss` file, processing and importing any dependencies and then minifying the result. This file (`main.css`) is placed inside the directory `/build/css/`.
+Just one plugin is necessary for processing our SASS files, and that is `gulp-sass`. This will read the `main.scss` file, processing and importing any dependencies and then minifying the result. This file (`main.css`) is placed inside the directory `/build/css/`.
+
+- **gulp-autoprefixer:** Gulp is currently configured to run autoprefixer after compiling the scss.  Autoprefixer will use the data based on current browser popularity and property support to apply prefixes for you. Autoprefixer is recommended by Google and used in Twitter, WordPress, Bootstrap and CodePen.
 
 ##### Images
 
@@ -121,6 +125,10 @@ All of the Gulp processes mentioned above are run automatically when any of the 
 Just as there is the `gulp dev` task for development, there is also a `gulp prod` task for putting your project into a production-ready state. This will run each of the tasks, while also adding the image minification task discussed above. There is also an empty `gulp deploy` task that is included when running the production task. This deploy task can be fleshed out to automatically push your production-ready site to your hosting setup.
 
 **Reminder:** When running the production task, gulp will not fire up the express server and serve your index.html. This task is designed to be run before the `deploy` step that may copy the files from `/build` to a production web server.
+
+##### Pre-compressing text assets
+
+When running with `gulp prod`, a pre-compressed file is generated in addition to uncompressed file (.html.gz, .js.gz, css.gz). This is done to enable web servers serve compressed content without having to compress it on the fly. Pre-compression is handled by `gzip` task.
 
 ##### Testing
 
@@ -164,4 +172,4 @@ An example test is provided for the following types of AngularJS modules:
 
 Testing AngularJS directives becomes a bit more complex involving mock data and DOM traversal, and so has been omitted from this boilerplate. This can be read about in detail [here](http://newtriks.com/2013/04/26/how-to-test-an-angularjs-directive/).
 
-All unit tests are run with `gulp unit`.
+All unit tests are run with `gulp unit`. When running unit tests, code coverage is simultaneously calculated and output as an HTML file to the `/coverage` directory.

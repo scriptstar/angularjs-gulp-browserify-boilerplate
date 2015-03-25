@@ -19,12 +19,24 @@ module.exports = {
     'dest': 'build/images'
   },
 
+  'fonts': {
+    'src' : ['app/fonts/**/*'],
+    'dest': 'build/fonts'
+  },
+
   'views': {
-    'src': [
+    'watch': [
       'app/index.html',
       'app/views/**/*.html'
     ],
+    'src': 'app/views/**/*.html',
     'dest': 'app/js'
+  },
+
+  'gzip': {
+    'src': 'build/**/*.{html,xml,json,css,js,js.map}',
+    'dest': 'build/',
+    'options': {}
   },
 
   'dist': {
@@ -33,7 +45,8 @@ module.exports = {
 
   'browserify': {
     'entries'   : ['./app/js/main.js'],
-    'bundleName': 'main.js'
+    'bundleName': 'main.js',
+    'sourcemap' : true
   },
 
   'test': {
